@@ -2,15 +2,27 @@ import sys
 
 banks = [list(map(int, list(l))) for l in sys.stdin.read().strip().split("\n")]
 
-def max_jolt(bank):
-    if len(bank) == 0:
+dp = {}
+def _help(bank, index, picked, num_len):
+    if picked == num_len:
         return 0
-    mx = 0
-    for i in range(1, len(bank)):
-        n = bank[0]*10 + bank[i]
-        if n > mx:
-            mx = n
-    return max(mx, max_jolt(bank[1:]))
+    if len(bank) == index and picked < num_len:
+        return -10**20
+    k = (hash(tuple(bank)), index, picked, num_len)
+    if k in dp:
+        return dp[k]
+    ans = _help(bank, index + 1, picked, num_len)
+    dp[k] = ans
+    if picked < num_len:
+        ans = max(ans, 10**((num_len - 1) - picked) * bank[index] + _help(bank, index + 1, picked + 1, num_len))
+        dp[k] = ans
+    return ans
 
-s = sum([max_jolt(b) for b in banks])
-print(s)
+def p1():
+    return sum((_help(b, 0, 0, 2) for b in banks))
+
+def p2():
+    return sum((_help(b, 0, 0, 12) for b in banks))
+
+print(p1())
+print(p2())
